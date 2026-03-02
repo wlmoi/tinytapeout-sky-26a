@@ -1,0 +1,8 @@
+{
+  "app": "Local integration",
+  "repo": "https://github.com/your-org/pll_smartcard",
+  "commit": "local-working-tree",
+  "workflow_url": "local",
+  "project_id": 999999,
+  "sort_id": 1772450000000
+}

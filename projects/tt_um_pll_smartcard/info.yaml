@@ -1,0 +1,55 @@
+# Tiny Tapeout project information
+project:
+  title:        "PLL Smartcard Clock Generator"
+  author:       "William Anthony"
+  discord:      "wlmoi"
+  description:  "Digital PLL core for smart-card clock generation and lock monitoring"
+  language:     "Verilog"
+  clock_hz:     13560000
+
+  tiles: "2x2"
+
+  top_module:  "tt_um_william_pll"
+
+  source_files:
+    - "tt_um_pll_smartcard.v"
+    - "pll_smartcard_top.v"
+    - "phase_frequency_detector.v"
+    - "digital_charge_pump_ctrl.v"
+    - "frequency_divider.v"
+    - "lock_detector.v"
+    - "loop_filter.v"
+    - "vco_digital_model.v"
+
+pinout:
+  # Inputs
+  ui[0]: "pll_enable"
+  ui[1]: "cp_gain_cfg[0]"
+  ui[2]: "cp_gain_cfg[1]"
+  ui[3]: "cp_gain_cfg[2]"
+  ui[4]: "cp_gain_cfg[3]"
+  ui[5]: "reserved"
+  ui[6]: "reserved"
+  ui[7]: "reserved"
+
+  # Outputs
+  uo[0]: "pll_lock"
+  uo[1]: "pll_almost_lock"
+  uo[2]: "clk_out"
+  uo[3]: "clk_div2"
+  uo[4]: "clk_div4"
+  uo[5]: "pfd_up"
+  uo[6]: "pfd_down"
+  uo[7]: "vco_ctrl_msb"
+
+  # Bidirectional pins
+  uio[0]: "div_ratio_cfg[0] (input)"
+  uio[1]: "div_ratio_cfg[1] (input)"
+  uio[2]: "div_ratio_cfg[2] (input)"
+  uio[3]: "div_ratio_cfg[3] (input)"
+  uio[4]: "div_ratio_cfg[4] (input)"
+  uio[5]: "div_ratio_cfg[5] (input)"
+  uio[6]: "div_ratio_cfg[6] (input)"
+  uio[7]: "div_ratio_cfg[7] (input)"
+
+yaml_version: 6

@@ -1,0 +1,18 @@
+{
+  "DESIGN_NAME": "tt_um_william_pll",
+  "VERILOG_FILES": [
+    "dir::tt_um_pll_smartcard.v",
+    "dir::pll_smartcard_top.v",
+    "dir::phase_frequency_detector.v",
+    "dir::digital_charge_pump_ctrl.v",
+    "dir::frequency_divider.v",
+    "dir::lock_detector.v",
+    "dir::loop_filter.v",
+    "dir::vco_digital_model.v"
+  ],
+  "DIE_AREA": "0 0 334.88 225.76",
+  "FP_DEF_TEMPLATE": "dir::../tt/tech/sky130A/def/tt_block_2x2_pg.def",
+  "VDD_PIN": "VPWR",
+  "GND_PIN": "VGND",
+  "RT_MAX_LAYER": "met4"
+}
