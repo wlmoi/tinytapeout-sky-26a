@@ -1,0 +1,28 @@
+# Tiny Tapeout project information
+project:
+  title:        "Smartcard PLL Clock Generator"
+  author:       "William Anthony"
+  discord:      "wlmoi"
+  description:  "Enable-controlled PLL clock generator model for smartcard timing experiments"
+  language:     "Verilog"
+  clock_hz:     13560000
+  tiles: "1x1"
+  top_module:  "tt_um_william_pll"
+  source_files:
+    - "project.v"
+    - "pll_smartcard_top.v"
+    - "phase_frequency_detector.v"
+    - "digital_charge_pump_ctrl.v"
+    - "loop_filter.v"
+    - "vco_digital_model.v"
+    - "frequency_divider.v"
+    - "lock_detector.v"
+pinout:
+  ui[0]: "PLL enable"
+  ui[1]: "Reserved"
+  ui[2]: "Reserved"
+  ui[3]: "Reserved"
+  ui[4]: "Divider ratio bit 0"
+  ui[5]: "Divider ratio bit 1"
+  ui[6]: "Divider ratio bit 2"
+  ui[7]: "Divider ratio bit 3"

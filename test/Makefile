@@ -1,0 +1,39 @@
+# Makefile
+# See https://docs.cocotb.org/en/stable/quickstart.html for more info
+
+# defaults
+SIM ?= icarus
+FST ?= -fst # Use more efficient FST format
+TOPLEVEL_LANG ?= verilog
+SRC_DIR = $(PWD)/../src
+PROJECT_SOURCES = \
+	project.v \
+	pll_smartcard_top.v \
+	phase_frequency_detector.v \
+	digital_charge_pump_ctrl.v \
+	loop_filter.v \
+	vco_digital_model.v \
+	frequency_divider.v \
+	lock_detector.v
+
+ifneq ($(GATES),yes)
+
+# RTL simulation:
+SIM_BUILD			= sim_build/rtl
+VERILOG_SOURCES += $(addprefix $(SRC_DIR)/,$(PROJECT_SOURCES))
+COMPILE_ARGS    += -DVCO_BEHAVIORAL
+
+else
+
+# Gate level simulation:
+SIM_BUILD			= sim_build/gl
+COMPILE_ARGS    += -DGL_TEST
+COMPILE_ARGS    += -DFUNCTIONAL
+COMPILE_ARGS    += -DSIM
+VERILOG_SOURCES += $(PDK_ROOT)/ihp-sg13g2/libs.ref/sg13g2_io/verilog/sg13g2_io.v
+VERILOG_SOURCES += $(PDK_ROOT)/ihp-sg13g2/libs.ref/sg13g2_stdcell/verilog/sg13g2_stdcell.v
+
+# this gets copied in by the GDS action workflow
+VERILOG_SOURCES += $(PWD)/gate_level_netlist.v
+
+endif
