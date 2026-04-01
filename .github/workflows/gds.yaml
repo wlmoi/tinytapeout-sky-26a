@@ -43,6 +43,10 @@ jobs:
           cache: 'pip'
       - run: pip install -r tt-multiplexer/py/requirements.txt -r tt/requirements.txt -r verilog/dv/mux/requirements.txt
 
+      - name: Export host Python site-packages for nix-shell tools
+        run: |
+          echo "HOST_PYTHON_SITE=$(python -c 'import site; print(site.getsitepackages()[0])')" >> $GITHUB_ENV
+
       - name: Load LibreLane environment variables
         run: cat .github/config/librelane.txt | tee -a $GITHUB_ENV
 
@@ -153,7 +157,7 @@ jobs:
             echo "Missing hardened macro artifacts for $name, hardening now..."
             (
               cd "$project"
-              nix-shell $GITHUB_WORKSPACE/librelane/shell.nix --run "python ../../tt/tt_tool.py --create-user-config --harden --create-tt-submission --no-docker"
+              nix-shell $GITHUB_WORKSPACE/librelane/shell.nix --run "PYTHONPATH=$HOST_PYTHON_SITE python ../../tt/tt_tool.py --create-user-config --harden --create-tt-submission --no-docker"
             )
 
             cp "$project/tt_submission/$name.oas" "$project/$name.oas"
