@@ -123,6 +123,11 @@ jobs:
 
             name=$(basename "$project")
 
+            # Keep this recovery step focused on the known missing project macro.
+            if [ "$name" != "tt_um_william_pll" ]; then
+              continue
+            fi
+
             # These are handled by dedicated hardening steps above.
             if [ "$name" = "tt_um_chip_rom" ] || [ "$name" = "tt_um_factory_test" ]; then
               continue
