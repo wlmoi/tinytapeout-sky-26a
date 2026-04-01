@@ -157,6 +157,7 @@ jobs:
             )
 
             cp "$project/tt_submission/$name.oas" "$project/$name.oas"
+            cp "$project/tt_submission/$name.gds" "$project/$name.gds"
             cp "$project/tt_submission/$name.lef" "$project/$name.lef"
             cp "$project/tt_submission/$name.v" "$project/$name.v"
             cp "$project/tt_submission/pdk.json" "$project/pdk.json"
