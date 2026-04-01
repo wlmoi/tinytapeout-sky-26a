@@ -155,34 +155,8 @@ jobs:
             (
               cd "$project"
 
-              # Generate minimal user config and merged config without importing tt_tool.py.
-              python - <<'PY'
-import json
-import yaml
-from pathlib import Path
-
-root = Path('.')
-src = root / 'src'
-info = yaml.safe_load((root / 'info.yaml').read_text())
-tile_sizes = yaml.safe_load((Path('../../tt/tech/sky130A/tile_sizes.yaml')).read_text())
-
-project = info['project']
-tiles = project['tiles']
-user_cfg = {
-    'DESIGN_NAME': project['top_module'],
-    'VERILOG_FILES': [f"dir::{f}" for f in project['source_files']],
-    'DIE_AREA': tile_sizes[tiles],
-    'FP_DEF_TEMPLATE': f"dir::../../tt/tech/sky130A/def/tt_block_{tiles}_pg.def",
-    'VDD_PIN': 'VPWR',
-    'GND_PIN': 'VGND',
-    'RT_MAX_LAYER': 'met4'
-}
-
-(src / 'user_config.json').write_text(json.dumps(user_cfg, indent=2) + '\n')
-base_cfg = json.loads((src / 'config.json').read_text())
-base_cfg.update(user_cfg)
-(src / 'config_merged.json').write_text(json.dumps(base_cfg, indent=2) + '\n')
-PY
+                  # Generate minimal user config and merged config without importing tt_tool.py.
+                  python -c "import json,yaml; from pathlib import Path; root=Path('.'); src=root/'src'; info=yaml.safe_load((root/'info.yaml').read_text()); tile_sizes=yaml.safe_load((Path('../../tt/tech/sky130A/tile_sizes.yaml')).read_text()); project=info['project']; tiles=project['tiles']; user_cfg={'DESIGN_NAME':project['top_module'],'VERILOG_FILES':[f'dir::{f}' for f in project['source_files']],'DIE_AREA':tile_sizes[tiles],'FP_DEF_TEMPLATE':f'dir::../../tt/tech/sky130A/def/tt_block_{tiles}_pg.def','VDD_PIN':'VPWR','GND_PIN':'VGND','RT_MAX_LAYER':'met4'}; (src/'user_config.json').write_text(json.dumps(user_cfg, indent=2)+'\\n'); base_cfg=json.loads((src/'config.json').read_text()); base_cfg.update(user_cfg); (src/'config_merged.json').write_text(json.dumps(base_cfg, indent=2)+'\\n')"
 
               nix-shell $GITHUB_WORKSPACE/librelane/shell.nix --run "python -m librelane --pdk-root \"$PDK_ROOT\" --run-tag wokwi --force-run-dir runs/wokwi --hide-progress-bar src/config_merged.json"
             )
