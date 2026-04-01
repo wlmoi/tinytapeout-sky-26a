@@ -111,6 +111,41 @@ jobs:
         working-directory: tt-multiplexer/ol2/tt_mux
         run: nix-shell $GITHUB_WORKSPACE/librelane/shell.nix --run "python build.py"
 
+      - name: Harden missing user macros
+        run: |
+          set -e
+          for project in projects/*; do
+            if [ ! -d "$project" ]; then
+              continue
+            fi
+
+            name=$(basename "$project")
+
+            # These are handled by dedicated hardening steps above.
+            if [ "$name" = "tt_um_chip_rom" ] || [ "$name" = "tt_um_factory_test" ]; then
+              continue
+            fi
+
+            if [ ! -f "$project/commit_id.json" ]; then
+              continue
+            fi
+
+            if [ -f "$project/$name.oas" ] && [ -f "$project/$name.lef" ] && [ -f "$project/$name.v" ]; then
+              continue
+            fi
+
+            echo "Missing hardened macro artifacts for $name, hardening now..."
+            (
+              cd "$project"
+              nix-shell $GITHUB_WORKSPACE/librelane/shell.nix --run "python ../../tt/tt_tool.py --create-user-config --harden --create-tt-submission --no-docker"
+            )
+
+            cp "$project/tt_submission/$name.oas" "$project/$name.oas"
+            cp "$project/tt_submission/$name.lef" "$project/$name.lef"
+            cp "$project/tt_submission/$name.v" "$project/$name.v"
+            cp "$project/tt_submission/pdk.json" "$project/pdk.json"
+          done
+
       - name: Copy macros
         run: python ./tt/configure.py --copy-macros
 
