@@ -17,6 +17,7 @@ jobs:
       PYTHONIOENCODING: utf-8
       PDK_ROOT: ${{ github.workspace }}/pdk
       TT_CONFIG: sky130.yaml
+      NIX_PATH: nixpkgs=channel:nixos-24.11
       # Uncomment the following line to build only the specified projects:
       #TT_ONLY_PROJECTS: tt_um_chip_rom,tt_um_factory_test
 
@@ -130,6 +131,21 @@ jobs:
               continue
             fi
 
+            flow_name=""
+            if [ -f "$project/pdk.json" ]; then
+              flow_name=$(jq -r '.FLOW_NAME' "$project/pdk.json")
+            else
+              flow_name=$(jq -r '.flow_version' "$project/commit_id.json")
+              if [ "$flow_name" = "null" ]; then
+                flow_name=$(jq -r '.openlane_version' "$project/commit_id.json")
+              fi
+            fi
+
+            # Only harden projects that are expected to be built via OpenLane2/LibreLane.
+            if [[ "$flow_name" != "OpenLane2 "* ]] && [[ "$flow_name" != "LibreLane"* ]]; then
+              continue
+            fi
+
             if [ -f "$project/$name.oas" ] && [ -f "$project/$name.lef" ] && [ -f "$project/$name.v" ]; then
               continue
             fi
@@ -137,7 +153,7 @@ jobs:
             echo "Missing hardened macro artifacts for $name, hardening now..."
             (
               cd "$project"
-              nix-shell $GITHUB_WORKSPACE/librelane/shell.nix --run "python ../../tt/tt_tool.py --create-user-config --harden --create-tt-submission --no-docker"
+              nix-shell $GITHUB_WORKSPACE/librelane/shell.nix --run "python -m pip install -r ../../tt/requirements.txt && python ../../tt/tt_tool.py --create-user-config --harden --create-tt-submission --no-docker"
             )
 
             cp "$project/tt_submission/$name.oas" "$project/$name.oas"

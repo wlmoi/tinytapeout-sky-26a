@@ -8,6 +8,7 @@ on:
 
 jobs:
   mpw_precheck:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     env:
       PYTHONIOENCODING: utf-8
       PDK_ROOT: /home/runner/pdk
@@ -86,6 +87,7 @@ jobs:
           path: tinytapeout-submission/precheck_results
 
   mpw_tapeout_checks:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     env:
       USER_ID: 5454
       PROJECT: caravel_openframe

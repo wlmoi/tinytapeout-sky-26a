@@ -36,7 +36,9 @@ jobs:
 
       - name: Download assets
         run: |
-          git clone https://github.com/TinyTapeout/tt-datasheet-artwork tt/docs/typst/resources/external
+          rm -rf tt/docs/typst/resources/external
+          mkdir -p tt/docs/typst/resources/fonts
+          git clone --depth 1 https://github.com/TinyTapeout/tt-datasheet-artwork tt/docs/typst/resources/external
           wget -P tt/docs/typst/resources/fonts https://github.com/google/fonts/raw/refs/heads/main/ofl/notocoloremoji/NotoColorEmoji-Regular.ttf
 
       - name: Install Typst
@@ -73,12 +75,14 @@ jobs:
           cp datasheet.pdf shuttle_index.json gh_pages
 
       - name: Upload 
+        if: vars.ENABLE_GITHUB_PAGES_DEPLOY == 'true'
         uses: actions/upload-pages-artifact@v3
         with:
           path: 'gh_pages'
 
   deploy_pages:
     needs: build_datasheet
+    if: vars.ENABLE_GITHUB_PAGES_DEPLOY == 'true'
 
     permissions:
       pages: write
