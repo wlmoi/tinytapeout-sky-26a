@@ -153,7 +153,7 @@ jobs:
             echo "Missing hardened macro artifacts for $name, hardening now..."
             (
               cd "$project"
-              nix-shell $GITHUB_WORKSPACE/librelane/shell.nix --run "python -m pip install -r ../../tt/requirements.txt && python ../../tt/tt_tool.py --create-user-config --harden --create-tt-submission --no-docker"
+              nix-shell $GITHUB_WORKSPACE/librelane/shell.nix --run "python ../../tt/tt_tool.py --create-user-config --harden --create-tt-submission --no-docker"
             )
 
             cp "$project/tt_submission/$name.oas" "$project/$name.oas"
