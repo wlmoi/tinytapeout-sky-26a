@@ -90,7 +90,7 @@ jobs:
             fi
 
             # Skip projects that were not built with OpenLane2 or LibreLane (e.g. analog and mixed-signal projects)
-            if [[ "$flow_name" != "OpenLane2 "* ]] && \
+            if [[ "$flow_name" != "OpenLane2"* ]] && \
                [[ "$flow_name" != "LibreLane"* ]]; then
               continue
             fi
@@ -142,7 +142,7 @@ jobs:
             fi
 
             # Only harden projects that are expected to be built via OpenLane2/LibreLane.
-            if [[ "$flow_name" != "OpenLane2 "* ]] && [[ "$flow_name" != "LibreLane"* ]]; then
+            if [[ "$flow_name" != "OpenLane2"* ]] && [[ "$flow_name" != "LibreLane"* ]]; then
               continue
             fi
 
