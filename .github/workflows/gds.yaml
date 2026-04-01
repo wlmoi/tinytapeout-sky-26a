@@ -147,7 +147,12 @@ jobs:
               continue
             fi
 
-            if [ -f "$project/$name.gds" ] && [ -f "$project/$name.lef" ] && [ -f "$project/$name.v" ]; then
+            if { [ -f "$project/$name.gds" ] || [ -f "$project/$name.oas" ]; } && [ -f "$project/$name.lef" ] && [ -f "$project/$name.v" ]; then
+              continue
+            fi
+
+            if [ ! -f "$project/src/config.json" ] || [ ! -f "$project/info.yaml" ]; then
+              echo "Skipping $name: missing src/config.json or info.yaml for auto-hardening"
               continue
             fi
 
