@@ -18,6 +18,7 @@ jobs:
       PDK_ROOT: ${{ github.workspace }}/pdk
       TT_CONFIG: sky130.yaml
       NIX_PATH: nixpkgs=channel:nixos-24.11
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
       # Uncomment the following line to build only the specified projects:
       #TT_ONLY_PROJECTS: tt_um_chip_rom,tt_um_factory_test
 
@@ -42,10 +43,6 @@ jobs:
           python-version: '3.11'
           cache: 'pip'
       - run: pip install -r tt-multiplexer/py/requirements.txt -r tt/requirements.txt -r verilog/dv/mux/requirements.txt
-
-      - name: Export host Python site-packages for nix-shell tools
-        run: |
-          echo "HOST_PYTHON_SITE=$(python -c 'import site; print(site.getsitepackages()[0])')" >> $GITHUB_ENV
 
       - name: Load LibreLane environment variables
         run: cat .github/config/librelane.txt | tee -a $GITHUB_ENV
@@ -150,21 +147,57 @@ jobs:
               continue
             fi
 
-            if [ -f "$project/$name.oas" ] && [ -f "$project/$name.lef" ] && [ -f "$project/$name.v" ]; then
+            if [ -f "$project/$name.gds" ] && [ -f "$project/$name.lef" ] && [ -f "$project/$name.v" ]; then
               continue
             fi
 
             echo "Missing hardened macro artifacts for $name, hardening now..."
             (
               cd "$project"
-              nix-shell $GITHUB_WORKSPACE/librelane/shell.nix --run "PYTHONPATH=$HOST_PYTHON_SITE python ../../tt/tt_tool.py --create-user-config --harden --create-tt-submission --no-docker"
+
+              # Generate minimal user config and merged config without importing tt_tool.py.
+              python - <<'PY'
+import json
+import yaml
+from pathlib import Path
+
+root = Path('.')
+src = root / 'src'
+info = yaml.safe_load((root / 'info.yaml').read_text())
+tile_sizes = yaml.safe_load((Path('../../tt/tech/sky130A/tile_sizes.yaml')).read_text())
+
+project = info['project']
+tiles = project['tiles']
+user_cfg = {
+    'DESIGN_NAME': project['top_module'],
+    'VERILOG_FILES': [f"dir::{f}" for f in project['source_files']],
+    'DIE_AREA': tile_sizes[tiles],
+    'FP_DEF_TEMPLATE': f"dir::../../tt/tech/sky130A/def/tt_block_{tiles}_pg.def",
+    'VDD_PIN': 'VPWR',
+    'GND_PIN': 'VGND',
+    'RT_MAX_LAYER': 'met4'
+}
+
+(src / 'user_config.json').write_text(json.dumps(user_cfg, indent=2) + '\n')
+base_cfg = json.loads((src / 'config.json').read_text())
+base_cfg.update(user_cfg)
+(src / 'config_merged.json').write_text(json.dumps(base_cfg, indent=2) + '\n')
+PY
+
+              nix-shell $GITHUB_WORKSPACE/librelane/shell.nix --run "python -m librelane --pdk-root \"$PDK_ROOT\" --run-tag wokwi --force-run-dir runs/wokwi --hide-progress-bar src/config_merged.json"
             )
 
-            cp "$project/tt_submission/$name.oas" "$project/$name.oas"
-            cp "$project/tt_submission/$name.gds" "$project/$name.gds"
-            cp "$project/tt_submission/$name.lef" "$project/$name.lef"
-            cp "$project/tt_submission/$name.v" "$project/$name.v"
-            cp "$project/tt_submission/pdk.json" "$project/pdk.json"
+            final_dir="$project/runs/wokwi/final"
+            cp "$final_dir/gds/$name.gds" "$project/$name.gds"
+            cp "$final_dir/lef/$name.lef" "$project/$name.lef"
+            if [ -f "$final_dir/pnl/$name.pnl.v" ]; then
+              cp "$final_dir/pnl/$name.pnl.v" "$project/$name.v"
+            elif [ -f "$final_dir/nl/$name.nl.v" ]; then
+              cp "$final_dir/nl/$name.nl.v" "$project/$name.v"
+            else
+              echo "Could not find final netlist for $name"
+              exit 1
+            fi
           done
 
       - name: Copy macros
