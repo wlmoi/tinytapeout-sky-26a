@@ -1,0 +1,7 @@
+{
+  "FLOW_NAME": "OpenLane2",
+  "FLOW_VERSION": "2.2.9",
+  "PDK": "sky130A",
+  "PDK_SOURCE": "open_pdks",
+  "PDK_VERSION": "unknown"
+}
